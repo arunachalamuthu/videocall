@@ -1,60 +1,131 @@
+let localStream
+let remoteStream
 let peerConnection = new RTCPeerConnection()
-let localStream;
-let remoteStream;
+let cameramute = true
 
-let init = async () => {
-    localStream = await navigator.mediaDevices.getUserMedia({video:true, audio:false})
+let uid = String(Math.floor(Math.random()*10000))
+let token = null
+let client;
+
+let AppId = '57fcd09053784c5eb292891e2030cdb5'
+// const server = {
+//     iceServer:[
+//         {
+//             urls:['stun:stun1.1.google.com:1992','stun:stun2.1.google.com:19302']
+//         }
+//     ]
+// }
+
+const init=async ()=>{
+
+    client = await AgoraRTM.createInstance(AppId)
+    await client.login({uid,token})
+
+    const channel = client.createChannel('main')
+    channel.join()
+    
+    const handler = (MemberID) =>{
+        console.log('join',MemberID)
+
+        createoffer(MemberID)
+      }
+      const handlerOffer = (data,MemberID) =>{
+       let message = JSON.parse(data.text)
+       if(message.type == 'offer'){
+        document.querySelector('#offer-sdp').value = JSON.stringify(message.offer)
+        createanswer(MemberID)
+       }
+       if(message.type == "answer"){
+        if(peerConnection){
+        document.querySelector('#answer-sdp').value = JSON.stringify(message.answer)
+        addAnswer()
+       }
+    }
+      }
+
+
+
+
+    localStream = await navigator.mediaDevices.getUserMedia({video:cameramute,audio:false})
+  
     remoteStream = new MediaStream()
+
     document.getElementById('user-1').srcObject = localStream
     document.getElementById('user-2').srcObject = remoteStream
 
-    localStream.getTracks().forEach((track) => {
-        peerConnection.addTrack(track, localStream);
-    });
 
-    peerConnection.ontrack = (event) => {
-        event.streams[0].getTracks().forEach((track) => {
-        remoteStream.addTrack(track);
-        });
-    };
+    
+    localStream.getTracks().forEach((track)=>{
+        console.log(track)
+        console.log(localStream)
+        peerConnection.addTrack(track,localStream)
+     })
+
+    
+     channel.on('MemberJoined',handler)
+     client.on('MessageFromPeer',handlerOffer)
+   
+
 }
 
-let createOffer = async () => {
+
+peerConnection.ontrack = async (event)=>{
+    console.log("peerconnection.ontrack call")
+           event.streams[0].getTracks().forEach((track)=>{
+            remoteStream.addTrack(track)
+           })
+ }
 
 
-    peerConnection.onicecandidate = async (event) => {
-        //Event that fires off when a new offer ICE candidate is created
+async function createoffer (MemberID){
+
+ 
+
+     peerConnection.onicecandidate = async (event)=>{
         if(event.candidate){
-            document.getElementById('offer-sdp').value = JSON.stringify(peerConnection.localDescription)
+            document.querySelector('#offer-sdp').value = JSON.stringify(peerConnection.localDescription)
+            client.sendMessageToPeer({text:JSON.stringify({"type":"offer","offer":peerConnection.localDescription})},MemberID)
         }
-    };
+     }
 
-    const offer = await peerConnection.createOffer();
-    await peerConnection.setLocalDescription(offer);
+     
+    let offer = await peerConnection.createOffer()
+    await peerConnection.setLocalDescription(offer)
+
+
+
+ 
 }
+async function createanswer (MemberID){
+ 
+   let offer = JSON.parse(document.querySelector('#offer-sdp').value)
 
-let createAnswer = async () => {
+ peerConnection.onicecandidate = async (event)=> {
+ 
+    if(event.candidate){
+        document.querySelector('#answer-sdp').value = JSON.stringify(peerConnection.localDescription)
+        client.sendMessageToPeer({text:JSON.stringify({"type":"answer","answer":answer})},MemberID)
+    }
+ }
 
-    let offer = JSON.parse(document.getElementById('offer-sdp').value)
+   await peerConnection.setRemoteDescription(offer)
 
-    peerConnection.onicecandidate = async (event) => {
-        //Event that fires off when a new answer ICE candidate is created
-        if(event.candidate){
-            console.log('Adding answer candidate...:', event.candidate)
-            document.getElementById('answer-sdp').value = JSON.stringify(peerConnection.localDescription)
-        }
-    };
+    let answer = await peerConnection.createAnswer()
+ 
+    peerConnection.setLocalDescription(answer)
 
-    await peerConnection.setRemoteDescription(offer);
+   
 
-    let answer = await peerConnection.createAnswer();
-    await peerConnection.setLocalDescription(answer); 
 }
 
 let addAnswer = async () => {
     console.log('Add answer triggerd')
+    console.log(peerConnection);
     let answer = JSON.parse(document.getElementById('answer-sdp').value)
+
     console.log('answer:', answer)
+    
+
     if (!peerConnection.currentRemoteDescription){
         peerConnection.setRemoteDescription(answer);
     }
@@ -62,6 +133,8 @@ let addAnswer = async () => {
 
 init()
 
-document.getElementById('create-offer').addEventListener('click', createOffer)
-document.getElementById('create-answer').addEventListener('click', createAnswer)
+
+
+document.querySelector('.createoffer').addEventListener('click',createoffer)
+document.querySelector('.createanswer').addEventListener('click',createanswer)
 document.getElementById('add-answer').addEventListener('click', addAnswer)
