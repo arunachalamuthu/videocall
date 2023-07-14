@@ -1,25 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="index.css">
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>WebRTC</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    
 </head>
 <body>
-    <video src="" autoplay playsinline id="user-1" class="video"></video>
-    <video src="" autoplay playsinline id="user-2" class=" video"></video>
 
-    <button class="createoffer">createoffer</button>
-    <button class="createanswer">createanswer</button>
+    <div id="videos">
+        <video class="video-player" id="user-1" autoplay playsinline></video>
+        <video class="video-player" id="user-2" autoplay playsinline></video>
+    </div>
 
-    <label for="">offer</label>
-  <textarea name="" id="offer-sdp" ></textarea>
-  <label for="">answer</label>
-  <textarea name="" id="answer-sdp" ></textarea>
-  <button id="add-answer">Add Answer</button>
-  <button class="camera">camera</button>
+    <button id="create-offer">Create Offer</button>
+    <label>SDP Offer</label>
+    <textarea id="offer-sdp"></textarea>
+
+    <button id="create-answer">Create Answer</button>
+    <label>SDP Answer</label>
+    <textarea id="answer-sdp"></textarea>
+
+    <button id="add-answer">Add Answer</button>
+    
 </body>
 <script src="agora-rtm-sdk-1.4.4.js"></script>
-<script src="./main.js"></script>
+<script src='main.js'></script>
 </html>
