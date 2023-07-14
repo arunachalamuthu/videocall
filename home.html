@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form action="">
+        <input type="text" name="room_id">
+        <input type="submit">
+    </form>
+</body>
+<script>
+
+    document.querySelector('form').addEventListener('submit',call)
+    function call(event){
+        event.preventDefault()
+        window.location = `index.html?room=${event.target.room_id.value}`
+        console.log('sss');
+    }
+</script>
+</html>
