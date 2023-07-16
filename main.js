@@ -26,9 +26,9 @@ let servers = {
 
 
 let init = async () => {
+
     client = await AgoraRTM.createInstance(APP_ID)
     await client.login({uid, token})
-    
     const channel = client.createChannel(room_id)
     channel.join()
 
@@ -59,11 +59,13 @@ let handleMessageFromPeer = async (message, MemberId) => {
     }
 
     if(message.type === 'answer'){
+
         document.getElementById('answer-sdp').value = JSON.stringify(message.answer)
         addAnswer()
     }
 
     if(message.type === 'candidate'){
+        
         if(peerConnection){
             peerConnection.addIceCandidate(message.candidate)
         }
@@ -132,9 +134,27 @@ let addAnswer = async () => {
     }
 
 }
+let cameratoggle =async ()=>{
+
+    let videoCheck = localStream.getTracks().find(track => track.kind == 'video')
+    if(videoCheck.enabled){
+        videoCheck.enabled = false
+    }
+    else{
+        videoCheck.enabled = true
+    }
+}
+
+let audiotoggle =async ()=>{
+
+    let audioCheck = localStream.getTracks().find(track => track.kind == 'audio')
+    if(audioCheck.enabled){
+        audioCheck.enabled = false
+    }
+    else{
+        audioCheck.enabled = true
+ }
+}
 
 init()
 
-// document.getElementById('create-offer').addEventListener('click', createOffer)
-// document.getElementById('create-answer').addEventListener('click', createAnswer)
-// document.getElementById('add-answer').addEventListener('click', addAnswer)
