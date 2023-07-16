@@ -156,5 +156,8 @@ let audiotoggle =async ()=>{
  }
 }
 
+document.querySelector('.camera-btn').addEventListener('click',cameratoggle)
+document.querySelector('.audio-btn').addEventListener('click',audiotoggle)
+
 init()
 
