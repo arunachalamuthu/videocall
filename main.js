@@ -147,7 +147,7 @@ let cameratoggle =async ()=>{
 
 let audiotoggle =async ()=>{
 
-    let audioCheck = localStream.getTracks().find(track => track.kind == 'audioinput')
+    let audioCheck = localStream.getTracks().find(track => track.kind == 'audiooutput')
     if(audioCheck.enabled){
         audioCheck.enabled = false
     }
